@@ -1,50 +1,69 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Gesto_de_gastos</title>
-    <script type="importmap"></script>
+    <title>Gestor de Gastos</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Gesto_de_gastos.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Gesto_de_gastos</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+    <div class="d-flex flex-column min-vh-100">
+
+        <div class="container-fluid flex-grow-1">
+            <div class="row h-100">
+
+                <!-- SIDEBAR -->
+                <div class="col-md-2 bg-dark text-white p-3" style="min-height: 100%">
+                    <h5 class="text-center mb-4">💰 Gestor</h5>
+                    <hr class="border-secondary" />
+
+                    <p class="text-uppercase text-secondary small">Movimientos</p>
+                    <ul class="nav flex-column mb-3">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-white" asp-controller="Movimiento" asp-action="Create">
+                                ➕ Nuevo Movimiento
+                            </a>
+                        </li>
+                    </ul>
+
+                    <hr class="border-secondary" />
+
+                    <p class="text-uppercase text-secondary small">Categorías</p>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-controller="Categoria" asp-action="Index">
+                                📋 Ver Categorías
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-white" asp-controller="Categoria" asp-action="Create">
+                                ➕ Nueva Categoría
+                            </a>
                         </li>
                     </ul>
                 </div>
+
+                <!-- CONTENIDO PRINCIPAL -->
+                <div class="col-md-10 p-4">
+                    @RenderBody()
+                </div>
+
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="bg-dark text-center py-3">
+            <p class="mb-0 small" style="color: #adb5bd">
+                © @DateTime.Now.Year Gestor de Gastos — Desarrollado con ASP.NET Core MVC
+            </p>
+        </footer>
+
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - Gesto_de_gastos - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
+
 </html>

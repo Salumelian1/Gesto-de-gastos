@@ -1,0 +1,43 @@
+@model List<Gestor_de_gastos.Models.Categoria>
+
+@{
+    ViewData["Title"] = "Categorías";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>Categorías</h3>
+    <a asp-controller="Categoria" asp-action="Create" class="btn btn-primary">➕ Nueva Categoría</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No hay categorías registradas todavía.</div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var categoria in Model)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header text-white d-flex align-items-center gap-2"
+                         style="background-color: @categoria.Color">
+                        <span class="fw-bold fs-5">@categoria.Nombre</span>
+                    </div>
+                    <div class="card-body d-flex align-items-center gap-2">
+                        <span class="text-muted small">Color:</span>
+                        <span class="badge" style="background-color: @categoria.Color">
+                            @categoria.Color
+                        </span>
+                    </div>
+                    <div class="card-footer d-flex gap-2">
+                        <a asp-controller="Categoria" asp-action="Update" asp-route-id="@categoria.Id"
+                           class="btn btn-sm btn-warning w-50">✏️ Editar</a>
+                        <a asp-controller="Categoria" asp-action="Delete" asp-route-id="@categoria.Id"
+                           class="btn btn-sm btn-danger w-50">🗑️ Eliminar</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

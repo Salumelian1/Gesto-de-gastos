@@ -1,0 +1,114 @@
+@model Gestor_de_gastos.DTOs.ResumenDTO
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h3 class="mb-4">Dashboard</h3>
+
+<!-- CARDS DE RESUMEN -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <p class="text-muted mb-1">💰 Total Ingresos</p>
+                <h4 class="text-success fw-bold">$@Model.TotalIngresos.ToString("N2")</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <p class="text-muted mb-1">💸 Total Gastos</p>
+                <h4 class="text-danger fw-bold">$@Model.TotalGastos.ToString("N2")</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <p class="text-muted mb-1">📊 Saldo</p>
+                <h4 class="fw-bold @(Model.Saldo >= 0 ? "text-success" : "text-danger")">
+                    $@Model.Saldo.ToString("N2")
+                </h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- GRAFICOS -->
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Gastos por Categoría</h5>
+                <canvas id="graficoTorta"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Top Categorías con más Gasto</h5>
+                <canvas id="graficoBarra"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // GRAFICO TORTA - Gastos por categoria
+        fetch('/Dashboard/GetGastosPorCategoria')
+            .then(res => res.json())
+            .then(datos => {
+                new Chart(document.getElementById('graficоTorta'), {
+                    type: 'pie',
+                    data: {
+                        labels: datos.map(d => d.nombre),
+                        datasets: [{
+                            data:            datos.map(d => d.total),
+                            backgroundColor: datos.map(d => d.color)
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            });
+
+        // GRAFICO BARRAS - Top categorias
+        fetch('/Dashboard/GetTopCategorias')
+            .then(res => res.json())
+            .then(datos => {
+                new Chart(document.getElementById('graficoBarra'), {
+                    type: 'bar',
+                    data: {
+                        labels: datos.map(d => d.nombre),
+                        datasets: [{
+                            label:           'Total Gastado',
+                            data:            datos.map(d => d.total),
+                            backgroundColor: datos.map(d => d.color)
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: value => '$' + value.toLocaleString()
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+    </script>
+}

@@ -1,0 +1,69 @@
+@model Gestor_de_gastos.viewModel.CategoriaViewModel
+
+@{
+    ViewData["Title"] = "Nueva Categoría";
+}
+
+<h3 class="mb-4">Nueva Categoría</h3>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label asp-for="Nombre" class="form-label">Nombre</label>
+        <input asp-for="Nombre" class="form-control" placeholder="Ej: Alimentación" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Color" class="form-label">Color</label>
+        <div class="d-flex align-items-center gap-3">
+            <input asp-for="Color" class="form-control form-control-color" type="color" value="#000000" />
+            <span class="text-muted small">Este color se usará para identificar la categoría en los gráficos</span>
+        </div>
+        <span asp-validation-for="Color" class="text-danger"></span>
+    </div>
+
+
+    <!-- Preview de la categoria -->
+    <div class="mb-4">
+        <label class="form-label">Vista previa</label>
+        <div>
+            <span id="preview" class="badge fs-6 p-2" style="background-color: #000000">
+                <span id="preview-icono"></span>
+                <span id="preview-nombre">Nueva Categoría</span>
+            </span>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a asp-controller="Categoria" asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </div>
+
+</form>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script>
+        const colorInput   = document.getElementById('Color');
+        const nombreInput  = document.getElementById('Nombre');
+        const iconoInput   = document.getElementById('Icono');
+        const preview      = document.getElementById('preview');
+        const previewNombre = document.getElementById('preview-nombre');
+        const previewIcono  = document.getElementById('preview-icono');
+
+        colorInput.addEventListener('input', () => {
+            preview.style.backgroundColor = colorInput.value;
+        });
+
+        nombreInput.addEventListener('input', () => {
+            previewNombre.textContent = nombreInput.value || 'Nueva Categoría';
+        });
+
+        iconoInput.addEventListener('input', () => {
+            previewIcono.textContent = iconoInput.value ? iconoInput.value + ' ' : '';
+        });
+    </script>
+}

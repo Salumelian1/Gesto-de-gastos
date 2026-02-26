@@ -1,8 +1,16 @@
+using Gestor_de_gastos.Interface;
+using Gestor_de_gastos.Repository;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+var CadenaConexion = builder.Configuration.GetConnectionString("SqliteConexion").ToString();
+builder.Services.AddSingleton<string>(CadenaConexion);
+builder.Services.AddHttpContextAccessor(); 
 
+builder.Services.AddScoped<IMovimientoRepository, MovimientoRepositorio>(); 
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>(); 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

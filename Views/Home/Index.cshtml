@@ -1,8 +1,175 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model Gestor_de_gastos.DTOs.ResumenDTO
+
+@{
+    ViewData["Title"] = "Inicio";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- CARDS DE RESUMEN -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <p class="text-muted mb-1">💰 Total Ingresos</p>
+                <h4 class="text-success fw-bold">$@Model.TotalIngresos.ToString("N2")</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <p class="text-muted mb-1">💸 Total Gastos</p>
+                <h4 class="text-danger fw-bold">$@Model.TotalGastos.ToString("N2")</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <p class="text-muted mb-1">📊 Saldo</p>
+                <h4 class="fw-bold @(Model.Saldo >= 0 ? "text-success" : "text-danger")">
+                    $@Model.Saldo.ToString("N2")
+                </h4>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- GRAFICOS -->
+<div class="row g-4 mb-5">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Gastos por Categoría</h5>
+                <!-- ✅ Agregar el div contenedor con altura fija -->
+                <div style="height: 300px; position: relative;">
+                    <canvas id="graficoTorta"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Top Categorías con más Gasto</h5>
+                <!-- ✅ Mismo contenedor con la misma altura -->
+                <div style="height: 300px; position: relative;">
+                    <canvas id="graficoBarra"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- LISTA DE MOVIMIENTOS -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5>Movimientos Recientes</h5>
+    <a asp-controller="Movimiento" asp-action="Create" class="btn btn-primary btn-sm">➕ Nuevo Movimiento</a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Fecha</th>
+                    <th>Descripción</th>
+                    <th>Categoría</th>
+                    <th>Tipo</th>
+                    <th>Monto</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Movimientos != null && Model.Movimientos.Any())
+                {
+                    @foreach (var movimiento in Model.Movimientos)
+                    {
+                        <tr>
+                            <td>@movimiento.Fecha.ToString("dd/MM/yyyy")</td>
+                            <td>@movimiento.Descripcion</td>
+                            <td>
+                                <span class="badge" style="background-color: @movimiento.Categoria.Color">
+                                    @movimiento.Categoria.Nombre
+                                </span>
+                            </td>
+                            <td>
+                                @if (movimiento.Tipo == Gestor_de_gastos.Models.TipoMovimiento.Ingreso)
+                                {
+                                    <span class="badge bg-success">Ingreso</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Gasto</span>
+                                }
+                            </td>
+                            <td>$@movimiento.Monto.ToString("N2")</td>
+                            <td>
+                                <a asp-controller="Movimiento" asp-action="Update" asp-route-id="@movimiento.Id"
+                                   class="btn btn-sm btn-warning">✏️</a>
+                                <a asp-controller="Movimiento" asp-action="Delete" asp-route-id="@movimiento.Id"
+                                   class="btn btn-sm btn-danger">🗑️</a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-3">No hay movimientos registrados</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        fetch('/Home/GetGastosPorCategoria')
+            .then(res => res.json())
+            .then(datos => {
+                new Chart(document.getElementById('graficoTorta'), {
+                    type: 'pie',
+                    data: {
+                        labels: datos.map(d => d.nombre),
+                        datasets: [{
+                            data:            datos.map(d => d.total),
+                            backgroundColor: datos.map(d => d.color)
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            });
+
+        fetch('/Home/GetTopCategorias')
+            .then(res => res.json())
+            .then(datos => {
+                new Chart(document.getElementById('graficoBarra'), {
+                    type: 'bar',
+                    data: {
+                        labels: datos.map(d => d.nombre),
+                        datasets: [{
+                            label:           'Total Gastado',
+                            data:            datos.map(d => d.total),
+                            backgroundColor: datos.map(d => d.color)
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { callback: value => '$' + value.toLocaleString() }
+                            }
+                        }
+                    }
+                });
+            });
+    </script>
+}

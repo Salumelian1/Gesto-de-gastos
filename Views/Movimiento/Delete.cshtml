@@ -1,0 +1,57 @@
+@model Gestor_de_gastos.Models.Movimiento
+
+@{
+    ViewData["Title"] = "Eliminar Movimiento";
+}
+
+<h3 class="mb-4">Eliminar Movimiento</h3>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <p class="text-danger mb-4">¿Estás seguro que querés eliminar este movimiento?</p>
+
+        <dl class="row">
+            <dt class="col-sm-3">Descripción</dt>
+            <dd class="col-sm-9">@Model.Descripcion</dd>
+
+            <dt class="col-sm-3">Monto</dt>
+            <dd class="col-sm-9">$@Model.Monto.ToString("N2")</dd>
+
+            <dt class="col-sm-3">Fecha</dt>
+            <dd class="col-sm-9">@Model.Fecha.ToString("dd/MM/yyyy")</dd>
+
+            <dt class="col-sm-3">Tipo</dt>
+            <dd class="col-sm-9">
+                @if (Model.Tipo == Gestor_de_gastos.Models.TipoMovimiento.Ingreso)
+                {
+                    <span class="badge bg-success">Ingreso</span>
+                }
+                else
+                {
+                    <span class="badge bg-danger">Gasto</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">Categoría</dt>
+            <dd class="col-sm-9">
+                <span class="badge" style="background-color: @Model.Categoria.Color">
+                    @Model.Categoria.Nombre
+                </span>
+            </dd>
+
+            @if (!string.IsNullOrEmpty(Model.Comentario))
+            {
+                <dt class="col-sm-3">Comentario</dt>
+                <dd class="col-sm-9">@Model.Comentario</dd>
+            }
+        </dl>
+    </div>
+    <div class="card-footer d-flex gap-2">
+        <form asp-action="DeleteConfirmed" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger">🗑️ Confirmar Eliminación</button>
+        </form>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </div>
+</div>
