@@ -1,31 +1,44 @@
-using System.Diagnostics;
+using Gestor_de_gastos.Interface;
 using Microsoft.AspNetCore.Mvc;
-using Gesto_de_gastos.Models;
-
-namespace Gesto_de_gastos.Controllers;
+using Gestor_de_gastos.DTOs;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
+    private readonly IMovimientoRepository _movimientoRepository;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(IMovimientoRepository movimientoRepositorio)
     {
-        _logger = logger;
+        _movimientoRepository = movimientoRepositorio;
     }
 
     public IActionResult Index()
     {
-        return View();
+        try
+        {
+            var resumen = _movimientoRepository.GetResumen();
+            resumen.Movimientos = _movimientoRepository.GetAll();
+            return View(resumen);
+        }
+        catch
+        {
+            return View(new ResumenDTO());
+        }
     }
 
-    public IActionResult Privacy()
+    public JsonResult GetGastosPorCategoria()
     {
-        return View();
+        try { return Json(_movimientoRepository.GetGastosPorCategoria()); }
+        catch { return Json(new List<object>()); }
     }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public JsonResult GetTopCategorias()
+    {
+        try { return Json(_movimientoRepository.GetTopCategorias()); }
+        catch { return Json(new List<object>()); }
+    }
+
     public IActionResult Error()
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        return View();
     }
 }
