@@ -24,7 +24,6 @@ Bootstrap 5           Estilos y diseño responsive
 Chart.js              Gráficos interactivos
 
 
-📁 Estructura del proyecto
 Gestor_de_gastos/
 ├── Controllers/
 │   ├── HomeController.cs
