@@ -15,7 +15,7 @@ Podés agregar capturas de pantalla aquí
 ✅ Listado de movimientos con opción de editar y eliminar
 
 🛠️ Tecnologías utilizadas
-Tecnología                   Uso
+
 ASP.NET Core MVC      Framework principal
 C#                    Lenguaje de programación
 SQLite                Base de datos
@@ -24,28 +24,3 @@ Bootstrap 5           Estilos y diseño responsive
 Chart.js              Gráficos interactivos
 
 
-Gestor_de_gastos/
-├── Controllers/
-│   ├── HomeController.cs
-│   ├── MovimientoController.cs
-│   └── CategoriaController.cs
-├── Models/
-│   ├── Movimiento.cs
-│   └── Categoria.cs
-├── DTOs/
-│   ├── ResumenDTO.cs
-│   ├── GastosPorCategoriaDTO.cs
-│   └── IngresoVsGastoDTO.cs
-├── ViewModels/
-│   ├── MovimientoViewModel.cs
-│   └── CategoriaViewModel.cs
-├── Repository/
-│   ├── MovimientoRepositorio.cs
-│   └── CategoriaRepositorio.cs
-├── Interface/
-│   ├── IMovimientoRepository.cs
-│   └── ICategoriaRepository.cs
-└── Views/
-    ├── Home/
-    ├── Movimiento/
-    └── Categoria/
