@@ -9,4 +9,7 @@ public class ResumenDTO
     public decimal TotalGastos   { get; set; }
     public decimal Saldo => TotalIngresos - TotalGastos; // Se calcula solo
     public List<Movimiento> Movimientos { get; set; } = new List<Movimiento>();
+
+    public DateOnly FechaDesde {get;set;}
+    public DateOnly FechaHasta {get;set;}
 }

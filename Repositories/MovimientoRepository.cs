@@ -32,7 +32,7 @@ public class MovimientoRepositorio : IMovimientoRepository
 
         movimiento.Id = Convert.ToInt32(cmd.ExecuteScalar());
     }
-    public List<Movimiento> GetAll()
+    public List<Movimiento> GetAll(DateOnly desde, DateOnly hasta)
     {
         List<Movimiento> movimientos = [];
         using var con = new SqliteConnection(CadenaConexion);
@@ -48,8 +48,11 @@ public class MovimientoRepositorio : IMovimientoRepository
                 c.Color AS CategoriaColor
             FROM Movimiento m
             INNER JOIN Categoria c ON m.CategoriaId = c.Id
+            WHERE  m.Fecha BETWEEN @desde AND @hasta
             ORDER BY m.Fecha DESC";
             using var cmd = new SqliteCommand(sql,con);
+            cmd.Parameters.Add(new SqliteParameter("@desde",desde.ToString("yyyy-MM-dd")));
+            cmd.Parameters.Add(new SqliteParameter("@hasta",hasta.ToString("yyyy-MM-dd")));
             using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
@@ -179,14 +182,16 @@ public class MovimientoRepositorio : IMovimientoRepository
         con.Close();
     }
 
-    public List<GastosPorCategoriaDTO> GetGastosPorCategoria()
+    public List<GastosPorCategoriaDTO> GetGastosPorCategoria(DateOnly desde, DateOnly hasta)
     {
         var resultado = new List<GastosPorCategoriaDTO>();
         string sql = @"SELECT c.Nombre, c.Color, SUM(m.Monto) AS Total FROM Movimiento m INNER JOIN Categoria c ON m.CategoriaId = c.Id
-        WHERE  m.Tipo = 1 GROUP BY c.Id,c.Nombre, c.Color ORDER BY Total DESC;";
+        WHERE  m.Tipo = 1 AND m.Fecha BETWEEN @desde AND @hasta GROUP BY c.Id,c.Nombre, c.Color ORDER BY Total DESC;";
         using var con = new SqliteConnection(CadenaConexion);
         con.Open();
         using var cmd = new SqliteCommand(sql,con);
+        cmd.Parameters.Add(new SqliteParameter("@desde",desde.ToString("yyyy-MM-dd")));
+        cmd.Parameters.Add(new SqliteParameter("@hasta",hasta.ToString("yyyy-MM-dd")));
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
         {
@@ -200,18 +205,21 @@ public class MovimientoRepositorio : IMovimientoRepository
         return resultado;
     }
 
-    public ResumenDTO GetResumen()
+    public ResumenDTO GetResumen(DateOnly desde, DateOnly hasta)
     {
          const string sql = @"
         SELECT 
             SUM(CASE WHEN Tipo = 0 THEN Monto ELSE 0 END) AS TotalIngresos,
             SUM(CASE WHEN Tipo = 1 THEN Monto ELSE 0 END) AS TotalGastos
-        FROM Movimiento";
+        FROM Movimiento
+        WHERE Fecha BETWEEN @desde AND @hasta";
 
         using var con = new SqliteConnection(CadenaConexion);
         con.Open();
 
         using var cmd = new SqliteCommand(sql, con);
+        cmd.Parameters.Add(new SqliteParameter("@desde",desde.ToString("yyyy-MM-dd")));
+        cmd.Parameters.Add(new SqliteParameter("@hasta",hasta.ToString("yyyy-MM-dd")));
         using var reader = cmd.ExecuteReader();
 
         if (reader.Read())
@@ -223,12 +231,14 @@ public class MovimientoRepositorio : IMovimientoRepository
                                     : Convert.ToDecimal(reader["TotalIngresos"]),
                 TotalGastos   = reader.IsDBNull(reader.GetOrdinal("TotalGastos"))   
                                     ? 0 
-                                    : Convert.ToDecimal(reader["TotalGastos"])
+                                    : Convert.ToDecimal(reader["TotalGastos"]),
+                FechaDesde    = desde,
+                FechaHasta    = hasta
             };
         }
-        return new ResumenDTO();
+        return new ResumenDTO { FechaDesde = desde, FechaHasta = hasta };
     }
-    public List<GastosPorCategoriaDTO> GetTopCategorias()
+    public List<GastosPorCategoriaDTO> GetTopCategorias(DateOnly desde, DateOnly hasta)
     {
         var resultado = new List<GastosPorCategoriaDTO>();
 
@@ -236,7 +246,7 @@ public class MovimientoRepositorio : IMovimientoRepository
             SELECT c.Nombre, c.Color, SUM(m.Monto) AS Total
             FROM Movimiento m
             INNER JOIN Categoria c ON m.CategoriaId = c.Id
-            WHERE m.Tipo = 1
+            WHERE m.Tipo = 1 AND m.Fecha BETWEEN @desde AND @hasta
             GROUP BY c.Id, c.Nombre, c.Color
             ORDER BY Total DESC
             LIMIT 5";
@@ -245,6 +255,8 @@ public class MovimientoRepositorio : IMovimientoRepository
         con.Open();
 
         using var cmd = new SqliteCommand(sql, con);
+        cmd.Parameters.Add(new SqliteParameter("@desde", desde.ToString("yyyy-MM-dd")));
+        cmd.Parameters.Add(new SqliteParameter("@hasta", hasta.ToString("yyyy-MM-dd")));
         using var reader = cmd.ExecuteReader();
 
         while (reader.Read())
