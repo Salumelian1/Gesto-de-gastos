@@ -21,7 +21,8 @@ public class MovimientoController : Controller
     {
         try
         {
-            List<Movimiento> movimientos = _movimientoRepository.GetAll();
+            var hoy = DateOnly.FromDateTime(DateTime.Today);
+            List<Movimiento> movimientos = _movimientoRepository.GetAll(new DateOnly(2000, 1, 1), hoy);
             return View(movimientos);
         }
         catch

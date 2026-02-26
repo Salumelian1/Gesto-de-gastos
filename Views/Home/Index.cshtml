@@ -2,10 +2,44 @@
 
 @{
     ViewData["Title"] = "Inicio";
+    var filtroActual = Context.Request.Query["filtro"].ToString();
+    if (string.IsNullOrEmpty(filtroActual)) filtroActual = "mes";
 }
 
+<!-- FILTROS DE FECHA -->
+<div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+
+    <!-- Botones de filtro rapido -->
+    <a asp-action="Index" asp-route-filtro="hoy"
+       class="btn btn-sm @(filtroActual == "hoy" ? "btn-primary" : "btn-outline-secondary")">
+        Hoy
+    </a>
+    <a asp-action="Index" asp-route-filtro="semana"
+       class="btn btn-sm @(filtroActual == "semana" ? "btn-primary" : "btn-outline-secondary")">
+        Esta semana
+    </a>
+    <a asp-action="Index" asp-route-filtro="mes"
+       class="btn btn-sm @(filtroActual == "mes" ? "btn-primary" : "btn-outline-secondary")">
+        Este mes
+    </a>
+
+    <!-- Separador -->
+    <span class="text-muted">|</span>
+
+    <!-- Rango personalizado -->
+    <form asp-action="Index" method="get" class="d-flex align-items-center gap-2">
+        <input type="date" name="desde" class="form-control form-control-sm"
+               value="@Model.FechaDesde.ToString("yyyy-MM-dd")" />
+        <span class="text-muted">hasta</span>
+        <input type="date" name="hasta" class="form-control form-control-sm"
+               value="@Model.FechaHasta.ToString("yyyy-MM-dd")" />
+        <button type="submit" class="btn btn-sm btn-primary">Filtrar</button>
+    </form>
+
+</div>
+
 <!-- CARDS DE RESUMEN -->
-<div class="row g-4 mb-5">
+<div class="row g-4 mb-4">
     <div class="col-md-4">
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center">
@@ -35,12 +69,11 @@
 </div>
 
 <!-- GRAFICOS -->
-<div class="row g-4 mb-5">
+<div class="row g-4 mb-4">
     <div class="col-md-6">
         <div class="card border-0 shadow-sm">
             <div class="card-body">
                 <h5 class="card-title mb-3">Gastos por Categoría</h5>
-                <!-- ✅ Agregar el div contenedor con altura fija -->
                 <div style="height: 300px; position: relative;">
                     <canvas id="graficoTorta"></canvas>
                 </div>
@@ -51,7 +84,6 @@
         <div class="card border-0 shadow-sm">
             <div class="card-body">
                 <h5 class="card-title mb-3">Top Categorías con más Gasto</h5>
-                <!-- ✅ Mismo contenedor con la misma altura -->
                 <div style="height: 300px; position: relative;">
                     <canvas id="graficoBarra"></canvas>
                 </div>
@@ -62,7 +94,7 @@
 
 <!-- LISTA DE MOVIMIENTOS -->
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h5>Movimientos Recientes</h5>
+    <h5>Movimientos</h5>
     <a asp-controller="Movimiento" asp-action="Create" class="btn btn-primary btn-sm">➕ Nuevo Movimiento</a>
 </div>
 
@@ -115,7 +147,9 @@
                 else
                 {
                     <tr>
-                        <td colspan="6" class="text-center text-muted py-3">No hay movimientos registrados</td>
+                        <td colspan="6" class="text-center text-muted py-3">
+                            No hay movimientos en el período seleccionado
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -125,9 +159,18 @@
 
 @section Scripts {
     <script>
-        fetch('/Home/GetGastosPorCategoria')
+        const desde = '@Model.FechaDesde.ToString("yyyy-MM-dd")';
+        const hasta = '@Model.FechaHasta.ToString("yyyy-MM-dd")';
+
+        // GRAFICO TORTA
+        fetch(`/Home/GetGastosPorCategoria?desde=${desde}&hasta=${hasta}`)
             .then(res => res.json())
             .then(datos => {
+                if (datos.length === 0) {
+                    document.getElementById('graficoTorta').parentElement.innerHTML =
+                        '<p class="text-muted text-center mt-5">Sin datos para el período</p>';
+                    return;
+                }
                 new Chart(document.getElementById('graficoTorta'), {
                     type: 'pie',
                     data: {
@@ -145,9 +188,15 @@
                 });
             });
 
-        fetch('/Home/GetTopCategorias')
+        // GRAFICO BARRAS
+        fetch(`/Home/GetTopCategorias?desde=${desde}&hasta=${hasta}`)
             .then(res => res.json())
             .then(datos => {
+                if (datos.length === 0) {
+                    document.getElementById('graficoBarra').parentElement.innerHTML =
+                        '<p class="text-muted text-center mt-5">Sin datos para el período</p>';
+                    return;
+                }
                 new Chart(document.getElementById('graficoBarra'), {
                     type: 'bar',
                     data: {
