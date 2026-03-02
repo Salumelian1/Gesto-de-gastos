@@ -28,6 +28,10 @@ public class HomeController : Controller
                         desde = hoy.AddDays(-7);
                         hasta = hoy;
                         break;
+                    case "año":
+                        desde = new DateOnly(hoy.Year,1,1);
+                        hasta = hoy;
+                        break;
                     case "mes":
                     default:
                         desde = new DateOnly(hoy.Year,hoy.Month,1);
